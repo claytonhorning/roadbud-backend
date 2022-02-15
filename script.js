@@ -106,7 +106,8 @@ const main = async () => {
           coordinates[0]
         );
         console.log('imageUrl', imageUrl);
-        await this.createFacebookPagePost('Incident Alert!', imageUrl);
+        let text = generatePostText(incident);
+        await this.createFacebookPagePost(text, imageUrl);
       }
       await new Incident(incident).save();
     }
