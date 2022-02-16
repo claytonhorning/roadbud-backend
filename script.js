@@ -2,7 +2,6 @@ const axios = require('axios');
 const uploadImage = require('./src/utils/cloudinary/uploadImage');
 const fs = require('fs');
 const path = require('path');
-const cloudinary = require('cloudinary');
 require('dotenv').config({ path: `${__dirname}/src/config/.env` });
 require('./src/config/database');
 
