@@ -6,6 +6,8 @@ const multer = require('multer');
 
 require('./config/database');
 
+const emailSubscriptionApi = require('./routes/emailSubscription.routes');
+
 const port = process.env.PORT || 3000;
 const app = express();
 
@@ -25,7 +27,12 @@ app.use(
 // parse application/json
 // Add headers
 app.use((req, res, next) => {
-  const allowedOrigins = ['http://localhost:3000/', 'http://localhost:3000'];
+  const allowedOrigins = [
+    'http://localhost:3000/',
+    'http://localhost:3000',
+    'http://www.roadbud.app/',
+    'https://www.roadbud.app/',
+  ];
   const { origin } = req.headers;
   if (allowedOrigins.indexOf(origin) > -1) {
     res.setHeader('Access-Control-Allow-Origin', origin);
@@ -53,8 +60,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
-
-// app.use(authApi);
+app.use(emailSubscriptionApi);
 
 app.all('*', (req, res) => {
   res.status(200).send({ message: 'Hello, world! Version 0' });
