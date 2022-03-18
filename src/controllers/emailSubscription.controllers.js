@@ -2,7 +2,14 @@ const EmailSubscription = require('../models/emailSubscription.model');
 
 exports.createEmailSubscription = async (req, res) => {
   try {
-    const emailSubscription = new EmailSubscription(req.body);
+    const emailSubscription = await EmailSubscription.findOneAndUpdate(
+      req.body,
+      req.body,
+      {
+        new: true,
+        upsert: true,
+      }
+    );
     await emailSubscription.save();
     res.status(201).send(emailSubscription);
   } catch (e) {
