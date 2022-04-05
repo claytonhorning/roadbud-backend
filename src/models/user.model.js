@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema({
   lastLoginAt: { type: Date, default: Date.now },
   isDeleted: { type: Boolean, default: false },
   isActivated: { type: Boolean, default: false },
+  settings: {
+    hasPushNotifications: { type: Boolean, default: false },
+    hasLocationServices: { type: Boolean, default: false },
+    hasEmailMarketing: { type: Boolean, default: false },
+  },
   tokens: [
     {
       token: {
