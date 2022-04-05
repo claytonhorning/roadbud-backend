@@ -6,7 +6,9 @@ const multer = require('multer');
 
 require('./config/database');
 
+const authApi = require('./api/auth');
 const emailSubscriptionApi = require('./routes/emailSubscription.routes');
+const userApi = require('./routes/user.routes');
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -60,7 +62,9 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+app.use(authApi);
 app.use(emailSubscriptionApi);
+app.use(userApi);
 
 app.all('*', (req, res) => {
   res.status(200).send({ message: 'Hello, world! Version 0' });
