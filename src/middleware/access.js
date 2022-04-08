@@ -1,4 +1,4 @@
-const access = async (req, res, next, access) => {
+const access = async (req, res, next) => {
   try {
     if (req.user.role !== 'admin') {
       throw new Error();

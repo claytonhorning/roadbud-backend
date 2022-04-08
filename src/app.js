@@ -9,6 +9,8 @@ require('./config/database');
 const authApi = require('./api/auth');
 const emailSubscriptionApi = require('./routes/emailSubscription.routes');
 const userApi = require('./routes/user.routes');
+const postApi = require('./routes/post.routes');
+const eventApi = require('./routes/event.routes');
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -65,6 +67,8 @@ app.use(express.json());
 app.use(authApi);
 app.use(emailSubscriptionApi);
 app.use(userApi);
+app.use(postApi);
+app.use(eventApi);
 
 app.all('*', (req, res) => {
   res.status(200).send({ message: 'Hello, world! Version 0' });
