@@ -22,10 +22,6 @@ const eventSchema = new mongoose.Schema({
   type: { type: String, default: '' },
   isCDOT: { type: Boolean, default: false },
   additionalInformation: { type: mongoose.Mixed },
-  post: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post',
-  },
   // Track Operations Data
   createdAt: { type: Date, default: Date.now },
   createdBy: {

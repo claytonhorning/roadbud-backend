@@ -4,6 +4,10 @@ const postSchema = new mongoose.Schema({
   title: { type: String, default: '' },
   description: { type: String, default: '' },
   imageUrl: { type: String, default: '' },
+  event: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event',
+  },
   // Track Operations Data
   createdAt: { type: Date, default: Date.now },
   createdBy: {
