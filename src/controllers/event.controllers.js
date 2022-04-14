@@ -17,7 +17,19 @@ exports.createEvent = async (req, res) => {
 
 exports.getEventsList = async (req, res) => {
   try {
-    const eventEvents = await Event.find({ isDeleted: false });
+    const eventEvents = await Event.aggregate([
+      {
+        $match: { isDeleted: false },
+      },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: '_id',
+          foreignField: 'event',
+          as: 'posts',
+        },
+      },
+    ]);
     return res.status(201).send(eventEvents);
   } catch (e) {
     res.status(500).send({ error: e });
