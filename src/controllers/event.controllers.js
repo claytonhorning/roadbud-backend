@@ -26,7 +26,10 @@ exports.getEventsList = async (req, res) => {
 
 exports.getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params._id);
+    const event = await Event.findById(req.params._id).populate({
+      path: 'createdBy',
+      select: 'fullName',
+    });
     return res.status(200).send(event);
   } catch (e) {
     res.status(500).send({ error: e });
