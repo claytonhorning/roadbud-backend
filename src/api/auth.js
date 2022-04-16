@@ -2,6 +2,8 @@ const express = require('express');
 
 const router = new express.Router();
 const User = require('../models/user.model');
+const Event = require('../models/event.model');
+const Post = require('../models/post.model');
 const auth = require('../middleware/auth');
 const _ = require('lodash');
 
@@ -83,7 +85,50 @@ router.get('/auth/me', auth, async (req, res) => {
       'createdAt',
       'settings',
     ]);
-    res.status(200).send(me);
+    const userEvents = await Event.aggregate([
+      // Stage 1: Filter deleted events
+      {
+        $match: { isDeleted: false },
+      },
+      // Stage 2: Select connected user events
+      {
+        $match: {
+          createdBy: req.user._id,
+        },
+      },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: '_id',
+          foreignField: 'event',
+          as: 'posts',
+        },
+      },
+      {
+        $sort: { _id: -1 },
+      },
+    ]);
+    const userPosts = await Post.aggregate([
+      // Stage 1: Filter deleted events
+      {
+        $match: { isDeleted: false },
+      },
+      // Stage 2: Select connected user events
+      {
+        $match: {
+          createdBy: req.user._id,
+        },
+      },
+      {
+        $sort: { _id: -1 },
+      },
+    ]);
+    const response = {
+      ...me,
+      events: userEvents,
+      posts: userPosts,
+    };
+    res.status(200).send(response);
   } catch (e) {
     res.status(500).send();
   }

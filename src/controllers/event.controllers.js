@@ -1,4 +1,3 @@
-const ObjectId = require('mongoose').Schema.Types.ObjectId;
 const Event = require('../models/event.model');
 
 exports.createEvent = async (req, res) => {
