@@ -11,7 +11,7 @@ exports.createPost = async (req, res) => {
     if (Object.keys(req.files).length > 0) {
       const image = req.files.file[0] || req.body.file || { path: '' };
       const uploadedImage = await uploadImage(image.path);
-      post.imageUrl = uploadedImage ? uploadedImage.url : '';
+      post.imageUrl = uploadedImage ? uploadedImage.secure_url : '';
       if (uploadedImage) {
         let filePath = path.join(`${__dirname}/../../`, image.path);
         if (filePath.includes('uploads')) {
@@ -61,7 +61,7 @@ exports.updatePost = async (req, res) => {
       updates.splice(updates.indexOf('file'), 1);
       const image = req.files.file[0] || req.body.file || { path: '' };
       const uploadedImage = await uploadImage(image.path);
-      post.imageUrl = uploadedImage ? uploadedImage.url : '';
+      post.imageUrl = uploadedImage ? uploadedImage.secure_url : '';
       let filePath = path.join(`${__dirname}/../../`, image.path);
       if (filePath.includes('uploads')) {
         fs.unlink(filePath, () => {});
