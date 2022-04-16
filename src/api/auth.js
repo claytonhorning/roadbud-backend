@@ -76,7 +76,13 @@ router.post('/auth/logoutall', auth, async (req, res) => {
 // Read connected user
 router.get('/auth/me', auth, async (req, res) => {
   try {
-    let me = _.pick(req.user, ['email', 'fullName', 'role', 'createdAt']);
+    let me = _.pick(req.user, [
+      'email',
+      'fullName',
+      'role',
+      'createdAt',
+      'settings',
+    ]);
     res.status(200).send(me);
   } catch (e) {
     res.status(500).send();
@@ -86,7 +92,7 @@ router.get('/auth/me', auth, async (req, res) => {
 // Update connected user
 router.patch('/auth/me', auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ['email', 'fullName', 'password'];
+  const allowedUpdates = ['email', 'fullName', 'password', 'settings'];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );

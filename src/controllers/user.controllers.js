@@ -4,7 +4,7 @@ exports.getUsersList = async (req, res) => {
   try {
     const conditions = req.user.role === 'admin' ? {} : { isDeleted: false };
     const users = await User.find(conditions).select(
-      'fullName email role createdAt isDeleted'
+      'fullName email role createdAt settings isDeleted'
     );
     res.status(201).send(users);
   } catch (e) {
@@ -14,7 +14,7 @@ exports.getUsersList = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ['email', 'fullName', 'password'];
+  const allowedUpdates = ['email', 'fullName', 'password', 'settings'];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
