@@ -1,8 +1,5 @@
+const ObjectId = require('mongoose').Schema.Types.ObjectId;
 const Event = require('../models/event.model');
-const omit = require('../utils/omit');
-const uploadImage = require('../utils/cloudinary/uploadImage');
-const fs = require('fs');
-const path = require('path');
 
 exports.createEvent = async (req, res) => {
   try {
@@ -18,8 +15,15 @@ exports.createEvent = async (req, res) => {
 exports.getEventsList = async (req, res) => {
   try {
     const eventEvents = await Event.aggregate([
+      // Stage 1: Filter deleted events
       {
         $match: { isDeleted: false },
+      },
+      // Stage 2: Select events from last 24 hours
+      {
+        $match: {
+          createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+        },
       },
       {
         $lookup: {
@@ -28,6 +32,9 @@ exports.getEventsList = async (req, res) => {
           foreignField: 'event',
           as: 'posts',
         },
+      },
+      {
+        $sort: { _id: -1 },
       },
     ]);
     return res.status(201).send(eventEvents);
