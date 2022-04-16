@@ -87,27 +87,20 @@ const main = async () => {
     if (isIncidentExists) {
       console.log('Incident already fetched!');
     } else {
+      let imageUrl = '';
       if (incident.geometry.type === 'MultiPoint') {
         let coordinates = incident.geometry.coordinates[0];
         console.log('coordinates', coordinates[1], coordinates[0]);
-        let imageUrl = await this.getStaticMapImage(
-          coordinates[1],
-          coordinates[0]
-        );
+        imageUrl = await this.getStaticMapImage(coordinates[1], coordinates[0]);
         console.log('imageUrl', imageUrl);
-        const postText = generatePostText(incident);
-        await this.createFacebookPagePost(postText, imageUrl);
       } else if (incident.geometry.type === 'Point') {
         let coordinates = incident.geometry.coordinates;
         console.log('coordinates', coordinates[1], coordinates[0]);
-        let imageUrl = await this.getStaticMapImage(
-          coordinates[1],
-          coordinates[0]
-        );
+        imageUrl = await this.getStaticMapImage(coordinates[1], coordinates[0]);
         console.log('imageUrl', imageUrl);
-        let text = generatePostText(incident);
-        await this.createFacebookPagePost(text, imageUrl);
       }
+      const postText = generatePostText(incident);
+      await this.createFacebookPagePost(postText, imageUrl);
       await new Incident(incident).save();
     }
   }
