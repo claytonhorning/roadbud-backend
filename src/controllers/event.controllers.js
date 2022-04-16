@@ -71,7 +71,7 @@ exports.getEventById = async (req, res) => {
       path: 'createdBy',
       select: 'fullName',
     });
-    return res.status(200).send(event);
+    return res.status(200).send(event[0]);
   } catch (e) {
     res.status(500).send({ error: e });
   }
