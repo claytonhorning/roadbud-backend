@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Event = require('../models/event.model');
 
 exports.createEvent = async (req, res) => {
@@ -44,7 +45,29 @@ exports.getEventsList = async (req, res) => {
 
 exports.getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params._id).populate({
+    const event = await Event.aggregate([
+      // Stage 1: Filter deleted events
+      {
+        $match: { isDeleted: false },
+      },
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.params._id),
+        },
+      },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: '_id',
+          foreignField: 'event',
+          as: 'posts',
+        },
+      },
+      {
+        $sort: { _id: -1 },
+      },
+    ]);
+    await Event.populate(event, {
       path: 'createdBy',
       select: 'fullName',
     });
