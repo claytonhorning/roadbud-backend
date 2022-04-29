@@ -1,10 +1,24 @@
-const mongoose = require('mongoose');
-const Event = require('../models/event.model');
+const getClosestCity = require("../utils/closestCity");
+const mongoose = require("mongoose");
+const Event = require("../models/event.model");
 
 exports.createEvent = async (req, res) => {
   try {
     const event = new Event(req.body);
     event.createdBy = req.user._id;
+
+    const closestCity = await getClosestCity(
+      req.body.location.latitude,
+      req.body.location.longitude
+    );
+
+    // Set the nearby city here
+    event.nearByCity = {
+      longitude: closestCity.lng,
+      latitude: closestCity.lat,
+      name: closestCity.name,
+    };
+
     await event.save();
     res.status(201).send(event);
   } catch (e) {
@@ -27,10 +41,10 @@ exports.getEventsList = async (req, res) => {
       },
       {
         $lookup: {
-          from: 'posts',
-          localField: '_id',
-          foreignField: 'event',
-          as: 'posts',
+          from: "posts",
+          localField: "_id",
+          foreignField: "event",
+          as: "posts",
         },
       },
       {
@@ -57,10 +71,10 @@ exports.getEventById = async (req, res) => {
       },
       {
         $lookup: {
-          from: 'posts',
-          localField: '_id',
-          foreignField: 'event',
-          as: 'posts',
+          from: "posts",
+          localField: "_id",
+          foreignField: "event",
+          as: "posts",
         },
       },
       {
@@ -68,8 +82,8 @@ exports.getEventById = async (req, res) => {
       },
     ]);
     await Event.populate(event, {
-      path: 'createdBy',
-      select: 'fullName',
+      path: "createdBy",
+      select: "fullName",
     });
     return res.status(200).send(event[0]);
   } catch (e) {
@@ -79,13 +93,13 @@ exports.getEventById = async (req, res) => {
 
 exports.updateEvent = async (req, res) => {
   let updates = Object.keys(req.body);
-  const allowedUpdates = ['title', 'description', 'imageUrl', 'file'];
+  const allowedUpdates = ["title", "description", "imageUrl", "file"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
 
   if (!isValidOperation) {
-    return res.status(400).send({ error: 'Invalid updates!' });
+    return res.status(400).send({ error: "Invalid updates!" });
   }
   const event = await Event.findById(req.params._id);
   try {
@@ -100,7 +114,7 @@ exports.updateEvent = async (req, res) => {
 exports.deleteEvent = async (req, res) => {
   const event = await Event.findById(req.params._id);
   if (!event) {
-    return res.status(404).send({ message: 'Event does not exist!' });
+    return res.status(404).send({ message: "Event does not exist!" });
   }
   try {
     event.isDeleted = true;

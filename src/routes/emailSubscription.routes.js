@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = new express.Router();
-const EmailSubscriptionController = require('../controllers/emailSubscription.controllers');
+const EmailSubscriptionController = require("../controllers/emailSubscription.controllers");
 
 router.post(
-  '/emailSubscription',
+  "/emailSubscription",
   EmailSubscriptionController.createEmailSubscription
 );
 

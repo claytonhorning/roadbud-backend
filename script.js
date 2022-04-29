@@ -1,11 +1,11 @@
-const axios = require('axios');
-const uploadImage = require('./src/utils/cloudinary/uploadImage');
-const fs = require('fs');
-const path = require('path');
-require('dotenv').config({ path: `${__dirname}/src/config/.env` });
-require('./src/config/database');
+const axios = require("axios");
+const uploadImage = require("./src/utils/cloudinary/uploadImage");
+const fs = require("fs");
+const path = require("path");
+require("dotenv").config({ path: `${__dirname}/src/config/.env` });
+require("./src/config/database");
 
-const Incident = require('./src/models/incident.model');
+const Incident = require("./src/models/incident.model");
 
 exports.getCotripIncidentsData = () => {
   return new Promise(async (resolve, reject) => {
@@ -14,7 +14,7 @@ exports.getCotripIncidentsData = () => {
       const requestResponse = await axios.get(
         `https://data.cotrip.org/api/v1/incidents?apiKey=${apiKey}`
       );
-      console.log('requestResponse', requestResponse.data);
+      console.log("requestResponse", requestResponse.data);
       resolve(requestResponse.data);
     } catch (error) {
       reject(error);
@@ -25,25 +25,25 @@ exports.getCotripIncidentsData = () => {
 exports.getStaticMapImage = (latitude, longitude) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const key = process.env.STATIC_MAP_API_KEY;
+      const key = process.env.GOOGLE_MAPS_KEY;
       const requestResponse = await axios.get(
         `https://maps.googleapis.com/maps/api/staticmap?size=600x600&markers=color:red|${latitude},${longitude}&zoom=13&key=${key}`,
         {
-          responseType: 'arraybuffer',
+          responseType: "arraybuffer",
         }
       );
-      console.log('requestResponse', requestResponse.data);
+      console.log("requestResponse", requestResponse.data);
       fs.writeFile(
         `./uploads/${latitude}_${longitude}.jpg`,
         requestResponse.data,
         async function (err) {
           if (err) reject(error);
           else {
-            console.log('The file was saved!');
+            console.log("The file was saved!");
             const uploadedImage = await uploadImage(
               `./uploads/${latitude}_${longitude}.jpg`
             );
-            let result = uploadedImage ? uploadedImage.url : '';
+            let result = uploadedImage ? uploadedImage.url : "";
             resolve(result);
           }
         }
@@ -61,7 +61,7 @@ exports.createFacebookPagePost = (name, url) => {
       const requestResponse = await axios.post(
         `https://graph.facebook.com/112071708065669/photos?url=${url}&name=${name}&access_token=${access_token}`
       );
-      console.log('requestResponse', requestResponse.data);
+      console.log("requestResponse", requestResponse.data);
       resolve(requestResponse.data);
     } catch (error) {
       reject(error);
@@ -71,7 +71,7 @@ exports.createFacebookPagePost = (name, url) => {
 
 const generatePostText = (incident) => {
   const properties = incident.properties;
-  let text = '';
+  let text = "";
   text += `Incident: ${properties.type} on ${properties.routeName} \n`;
   text += `Updated: ${properties.lastUpdated} \n`;
   text += `Description: ${properties.travelerInformationMessage} \n`;
@@ -82,22 +82,22 @@ const main = async () => {
   const incidents = await this.getCotripIncidentsData();
   for (let incident of incidents.features) {
     const isIncidentExists = await Incident.exists({
-      'properties.id': incident.properties.id,
+      "properties.id": incident.properties.id,
     });
     if (isIncidentExists) {
-      console.log('Incident already fetched!');
+      console.log("Incident already fetched!");
     } else {
-      let imageUrl = '';
-      if (incident.geometry.type === 'MultiPoint') {
+      let imageUrl = "";
+      if (incident.geometry.type === "MultiPoint") {
         let coordinates = incident.geometry.coordinates[0];
-        console.log('coordinates', coordinates[1], coordinates[0]);
+        console.log("coordinates", coordinates[1], coordinates[0]);
         imageUrl = await this.getStaticMapImage(coordinates[1], coordinates[0]);
-        console.log('imageUrl', imageUrl);
-      } else if (incident.geometry.type === 'Point') {
+        console.log("imageUrl", imageUrl);
+      } else if (incident.geometry.type === "Point") {
         let coordinates = incident.geometry.coordinates;
-        console.log('coordinates', coordinates[1], coordinates[0]);
+        console.log("coordinates", coordinates[1], coordinates[0]);
         imageUrl = await this.getStaticMapImage(coordinates[1], coordinates[0]);
-        console.log('imageUrl', imageUrl);
+        console.log("imageUrl", imageUrl);
       }
       const postText = generatePostText(incident);
       await this.createFacebookPagePost(postText, imageUrl);
@@ -106,15 +106,15 @@ const main = async () => {
   }
 };
 
-var CronJob = require('cron').CronJob;
+var CronJob = require("cron").CronJob;
 var job = new CronJob(
-  '0 */2 * * * *',
+  "0 */2 * * * *",
   function () {
-    console.log('You will see this message every 2 minutes');
+    console.log("You will see this message every 2 minutes");
     main();
   },
   null,
   false,
-  'America/Los_Angeles'
+  "America/Los_Angeles"
 );
 job.start();
