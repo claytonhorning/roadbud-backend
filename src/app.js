@@ -78,6 +78,6 @@ app.all("*", (req, res) => {
 
 const server = http.createServer(app);
 
-server.listen(port, () => {
+server.listen(5000, () => {
   console.log(`Server is up on port : ${port}`);
 });
