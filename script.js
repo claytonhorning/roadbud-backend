@@ -85,6 +85,7 @@ const main = async () => {
       "properties.id": incident.properties.id,
     });
     if (isIncidentExists) {
+      // incident always already fetched wtf
       console.log("Incident already fetched!");
     } else {
       let imageUrl = "";
@@ -100,7 +101,6 @@ const main = async () => {
         console.log("imageUrl", imageUrl);
       }
       const postText = generatePostText(incident);
-      await this.createFacebookPagePost(postText, imageUrl);
       await new Incident(incident).save();
     }
   }
