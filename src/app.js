@@ -3,6 +3,7 @@ const http = require("http");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const multer = require("multer");
+const job = require("../script");
 
 require("./config/database");
 
@@ -78,6 +79,8 @@ app.all("*", (req, res) => {
 
 const server = http.createServer(app);
 
-server.listen(5000, () => {
+server.listen(port, () => {
   console.log(`Server is up on port : ${port}`);
 });
+
+job.start();

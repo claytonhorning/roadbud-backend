@@ -117,4 +117,5 @@ var job = new CronJob(
   false,
   "America/Los_Angeles"
 );
-job.start();
+
+module.exports = job;
