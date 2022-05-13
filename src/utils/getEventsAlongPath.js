@@ -27,6 +27,10 @@ const getEventsAlongPath = async (polyline) => {
       $sort: { _id: -1 },
     },
   ])) {
+    await Event.populate(doc, {
+      path: "createdBy",
+      select: "fullName",
+    });
     let formattedPolyline = polyline.map((location) => ({
       lat: location?.latitude,
       lng: location?.longitude,
@@ -39,7 +43,7 @@ const getEventsAlongPath = async (polyline) => {
       2000 // Tolerance
     );
 
-    if (isNearPolyline) {
+    if (isNearPolyline && doc.location !== (null || undefined)) {
       events.push(doc);
     }
   }

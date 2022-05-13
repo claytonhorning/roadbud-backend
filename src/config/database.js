@@ -10,10 +10,3 @@ mongoose.connect(
     useFindAndModify: false,
   }
 );
-
-// LOCAL
-// mongoose.connect('mongodb://127.0.0.1:27017/${process.env.COLLECTION_NAME}', {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-//   useCreateIndex: true
-// });

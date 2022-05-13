@@ -5,7 +5,7 @@ const getClosestCity = async (lat, lon) => {
 
   try {
     const res = await axios.get(
-      `http://api.geonames.org/findNearbyJSON?lat=${lat}&lng=${lon}&username=clayton`
+      `http://api.geonames.org/findNearbyPlaceNameJSON?lat=${lat}&lng=${lon}&username=clayton`
     );
     closestCity = res.data.geonames[0];
   } catch (error) {

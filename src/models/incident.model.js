@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Event = require("./event.model");
 const Post = require("./post.model");
+const getClosestCity = require("../utils/closestCity");
 
 const incidentSchema = new mongoose.Schema({
   type: { type: String, default: "" },
@@ -29,11 +30,24 @@ incidentSchema.pre("save", async function preSave(next) {
       longitude: coordinates[0],
     };
   }
+
+  const closestCity = await getClosestCity(
+    location.latitude,
+    location.longitude
+  );
+
+  // Set the nearby city here
+
   const event = new Event({
     name: `Incident: ${incidentProperties.type} on ${incidentProperties.routeName}`,
     type: incidentProperties.type,
     isCDOT: true,
     location,
+    nearByCity: {
+      longitude: closestCity.lng,
+      latitude: closestCity.lat,
+      name: closestCity.name,
+    },
   });
 
   await event.save().then(async (event) => {
