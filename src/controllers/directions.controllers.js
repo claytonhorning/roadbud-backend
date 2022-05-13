@@ -12,7 +12,7 @@ exports.getDirections = async (req, res) => {
     // Take to and from params and decode the polyline. Then save it to the object
     await getDirectionsRequest(req.params.from, req.params.to)
       .then(async (res) => {
-        const polylineString = res.data?.routes[0]?.overview_polyline?.points;
+        const polylineString = res.data.routes[0].overview_polyline.points;
         directions.polyline = getDirectionsPolyline(polylineString);
       })
       .catch((err) => {
