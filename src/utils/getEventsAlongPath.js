@@ -32,13 +32,13 @@ const getEventsAlongPath = async (polyline) => {
       select: "fullName",
     });
     let formattedPolyline = polyline.map((location) => ({
-      lat: location?.latitude,
-      lng: location?.longitude,
+      lat: location.latitude,
+      lng: location.longitude,
     }));
 
     // Change first param to doc.location and second param to the polyline passed in
     let isNearPolyline = PolyUtil.isLocationOnEdge(
-      { lat: doc.location?.latitude, lng: doc.location?.longitude },
+      { lat: doc.location.latitude, lng: doc.location.longitude },
       formattedPolyline,
       2000 // Tolerance
     );
