@@ -36,8 +36,8 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:3000/",
     "http://localhost:3000",
-    "http://www.roadbud.app/",
-    "https://www.roadbud.app/",
+    "http://www.api.roadbud.app/",
+    "https://www.api.roadbud.app/",
   ];
   const { origin } = req.headers;
   if (allowedOrigins.indexOf(origin) > -1) {

@@ -7,7 +7,7 @@ const path = require("path");
 exports.createPost = async (req, res) => {
   try {
     const postData = omit(req.body, ["file"]);
-    const post = new Post(postData);
+    const post = new Post(postData).populate();
     if (Object.keys(req.files).length > 0) {
       const image = req.files.file[0] || req.body.file || { path: "" };
       const uploadedImage = await uploadImage(image.path);
