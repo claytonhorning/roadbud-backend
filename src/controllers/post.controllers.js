@@ -3,6 +3,7 @@ const omit = require("../utils/omit");
 const uploadImage = require("../utils/cloudinary/uploadImage");
 const fs = require("fs");
 const path = require("path");
+require("dotenv").config({ path: `${__dirname}/src/config/.env` });
 
 exports.createPost = async (req, res) => {
   try {
@@ -11,7 +12,16 @@ exports.createPost = async (req, res) => {
     if (Object.keys(req.files).length > 0) {
       const image = req.files.file[0] || req.body.file || { path: "" };
       const uploadedImage = await uploadImage(image.path);
-      post.imageUrl = uploadedImage ? uploadedImage.secure_url : "";
+
+      if (uploadedImage.width >= uploadedImage.height) {
+        post.imageUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/w_500,h_400,c_fit/${uploadedImage.public_id}`;
+      } else if (uploadedImage.height > uploadedImage.width) {
+        post.imageUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/w_400,h_500,c_fit/${uploadedImage.public_id}`;
+      } else {
+        post.imageUrl = "";
+      }
+
+      console.log(uploadedImage, post.imageUrl, uploadedImage.secure_url);
       if (uploadedImage) {
         let filePath = path.join(`${__dirname}/../../`, image.path);
         if (filePath.includes("uploads")) {
