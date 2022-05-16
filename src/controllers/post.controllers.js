@@ -1,25 +1,29 @@
-const Post = require('../models/post.model');
-const omit = require('../utils/omit');
-const uploadImage = require('../utils/cloudinary/uploadImage');
-const fs = require('fs');
-const path = require('path');
+const Post = require("../models/post.model");
+const omit = require("../utils/omit");
+const uploadImage = require("../utils/cloudinary/uploadImage");
+const fs = require("fs");
+const path = require("path");
 
 exports.createPost = async (req, res) => {
   try {
-    const postData = omit(req.body, ['file']);
+    const postData = omit(req.body, ["file"]);
     const post = new Post(postData);
     if (Object.keys(req.files).length > 0) {
-      const image = req.files.file[0] || req.body.file || { path: '' };
+      const image = req.files.file[0] || req.body.file || { path: "" };
       const uploadedImage = await uploadImage(image.path);
-      post.imageUrl = uploadedImage ? uploadedImage.secure_url : '';
+      post.imageUrl = uploadedImage ? uploadedImage.secure_url : "";
       if (uploadedImage) {
         let filePath = path.join(`${__dirname}/../../`, image.path);
-        if (filePath.includes('uploads')) {
+        if (filePath.includes("uploads")) {
           fs.unlink(filePath, () => {});
         }
       }
     }
     post.createdBy = req.user._id;
+    await Post.populate(post, {
+      path: "createdBy",
+      select: "fullName",
+    });
     await post.save();
     res.status(201).send(post);
   } catch (e) {
@@ -47,23 +51,23 @@ exports.getPostById = async (req, res) => {
 
 exports.updatePost = async (req, res) => {
   let updates = Object.keys(req.body);
-  const allowedUpdates = ['title', 'description', 'imageUrl', 'file'];
+  const allowedUpdates = ["title", "description", "imageUrl", "file"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
 
   if (!isValidOperation) {
-    return res.status(400).send({ error: 'Invalid updates!' });
+    return res.status(400).send({ error: "Invalid updates!" });
   }
   const post = await Post.findById(req.params._id);
   try {
     if (Object.keys(req.files).length > 0) {
-      updates.splice(updates.indexOf('file'), 1);
-      const image = req.files.file[0] || req.body.file || { path: '' };
+      updates.splice(updates.indexOf("file"), 1);
+      const image = req.files.file[0] || req.body.file || { path: "" };
       const uploadedImage = await uploadImage(image.path);
-      post.imageUrl = uploadedImage ? uploadedImage.secure_url : '';
+      post.imageUrl = uploadedImage ? uploadedImage.secure_url : "";
       let filePath = path.join(`${__dirname}/../../`, image.path);
-      if (filePath.includes('uploads')) {
+      if (filePath.includes("uploads")) {
         fs.unlink(filePath, () => {});
       }
     }
@@ -78,7 +82,7 @@ exports.updatePost = async (req, res) => {
 exports.deletePost = async (req, res) => {
   const post = await Post.findById(req.params._id);
   if (!post) {
-    return res.status(404).send({ message: 'Post does not exist!' });
+    return res.status(404).send({ message: "Post does not exist!" });
   }
   try {
     post.isDeleted = true;

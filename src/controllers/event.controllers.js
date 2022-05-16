@@ -60,7 +60,6 @@ exports.getEventsList = async (req, res) => {
 exports.getEventById = async (req, res) => {
   try {
     const event = await Event.aggregate([
-      // Stage 1: Filter deleted events
       {
         $match: { isDeleted: false },
       },
