@@ -32,8 +32,8 @@ incidentSchema.pre("save", async function preSave(next) {
   }
 
   const closestCity = await getClosestCity(
-    location.latitude,
-    location.longitude
+    location?.latitude,
+    location?.longitude
   );
 
   // Set the nearby city here

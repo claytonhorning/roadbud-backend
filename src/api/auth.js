@@ -1,18 +1,19 @@
-const express = require('express');
+const express = require("express");
 
 const router = new express.Router();
-const User = require('../models/user.model');
-const Event = require('../models/event.model');
-const Post = require('../models/post.model');
-const auth = require('../middleware/auth');
-const _ = require('lodash');
+const User = require("../models/user.model");
+const Event = require("../models/event.model");
+const Post = require("../models/post.model");
+const auth = require("../middleware/auth");
+const _ = require("lodash");
+const jwt = require("jsonwebtoken");
 
 // Create user account
-router.post('/auth/', async (req, res) => {
+router.post("/auth/", async (req, res) => {
   try {
     const userIsExist = (await User.exists({ email: req.body.email })) || null;
     if (userIsExist) {
-      return res.status(409).send({ error: 'User is already registered' });
+      return res.status(409).send({ error: "User is already registered" });
     }
 
     const user = new User({
@@ -23,8 +24,8 @@ router.post('/auth/', async (req, res) => {
     const token = await user.generateAuthToken();
 
     res
-      .header('x-auth-token', token)
-      .header('access-control-expose-headers', 'x-auth-token')
+      .header("x-auth-token", token)
+      .header("access-control-expose-headers", "x-auth-token")
       .status(201)
       .send({ token });
   } catch (e) {
@@ -32,19 +33,20 @@ router.post('/auth/', async (req, res) => {
   }
 });
 
-router.post('/auth/login', async (req, res) => {
+router.post("/auth/login", async (req, res) => {
   try {
     const user = await User.findByCredentials(
       req.body.email,
       req.body.password
     );
+    console.log(typeof user);
     if (user.isDeleted) {
-      return res.status(400).send({ error: 'Account is Deactivated' });
+      return res.status(400).send({ error: "Account is Deactivated" });
     }
     const token = await user.generateAuthToken();
     res
-      .header('x-auth-token', token)
-      .header('access-control-expose-headers', 'x-auth-token')
+      .header("x-auth-token", token)
+      .header("access-control-expose-headers", "x-auth-token")
       .status(200)
       .send({ token });
   } catch (e) {
@@ -52,7 +54,27 @@ router.post('/auth/login', async (req, res) => {
   }
 });
 
-router.post('/auth/logout', auth, async (req, res) => {
+router.post("/oauth/login", async (req, res) => {
+  try {
+    const decodedUser = jwt.decode(req.body.idToken);
+
+    const user = await User.findOne({ email: decodedUser.email });
+    console.log(typeof user);
+
+    if (user) {
+      const token = await user.generateAuthToken();
+      res
+        .header("x-auth-token", token)
+        .header("access-control-expose-headers", "x-auth-token")
+        .status(200)
+        .send({ token });
+    }
+  } catch (e) {
+    res.status(e.code || 400).send({ error: e.message });
+  }
+});
+
+router.post("/auth/logout", auth, async (req, res) => {
   try {
     req.user.tokens = req.user.tokens.filter(
       (token) => token.token !== req.token
@@ -65,7 +87,7 @@ router.post('/auth/logout', auth, async (req, res) => {
 });
 
 // Logout from all devices
-router.post('/auth/logoutall', auth, async (req, res) => {
+router.post("/auth/logoutall", auth, async (req, res) => {
   try {
     req.user.tokens = [];
     await req.user.save();
@@ -76,14 +98,14 @@ router.post('/auth/logoutall', auth, async (req, res) => {
 });
 
 // Read connected user
-router.get('/auth/me', auth, async (req, res) => {
+router.get("/auth/me", auth, async (req, res) => {
   try {
     let me = _.pick(req.user, [
-      'email',
-      'fullName',
-      'role',
-      'createdAt',
-      'settings',
+      "email",
+      "fullName",
+      "role",
+      "createdAt",
+      "settings",
     ]);
     const userEvents = await Event.aggregate([
       // Stage 1: Filter deleted events
@@ -98,10 +120,10 @@ router.get('/auth/me', auth, async (req, res) => {
       },
       {
         $lookup: {
-          from: 'posts',
-          localField: '_id',
-          foreignField: 'event',
-          as: 'posts',
+          from: "posts",
+          localField: "_id",
+          foreignField: "event",
+          as: "posts",
         },
       },
       {
@@ -135,15 +157,15 @@ router.get('/auth/me', auth, async (req, res) => {
 });
 
 // Update connected user
-router.patch('/auth/me', auth, async (req, res) => {
+router.patch("/auth/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ['email', 'fullName', 'password', 'settings'];
+  const allowedUpdates = ["email", "fullName", "password", "settings"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
 
   if (!isValidOperation) {
-    return res.status(400).send({ error: 'Invalid updates!' });
+    return res.status(400).send({ error: "Invalid updates!" });
   }
 
   try {
@@ -151,8 +173,8 @@ router.patch('/auth/me', auth, async (req, res) => {
     await req.user.save();
     const token = await req.user.generateAuthToken();
     res
-      .header('x-auth-token', token)
-      .header('access-control-expose-headers', 'x-auth-token')
+      .header("x-auth-token", token)
+      .header("access-control-expose-headers", "x-auth-token")
       .status(200)
       .send({ token });
   } catch (e) {
