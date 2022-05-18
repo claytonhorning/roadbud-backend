@@ -74,7 +74,7 @@ app.use(eventApi);
 app.use(directionsApi);
 
 app.all("*", (req, res) => {
-  res.status(200).send({ message: "Hello, world! Version 0" });
+  res.status(200).send({ message: "Roadbud App API" });
 });
 
 const server = http.createServer(app);

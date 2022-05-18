@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema({
-  name: { type: String, default: '' },
-  description: { type: String, default: '' },
+  name: { type: String, default: "" },
+  description: { type: String, default: "" },
   startsAt: { type: Date, default: Date.now },
   endsAt: { type: Date },
   location: {
@@ -19,17 +19,18 @@ const eventSchema = new mongoose.Schema({
     latitudeDelta: { type: Number },
     longitudeDelta: { type: Number },
   },
-  type: { type: String, default: '' },
+  type: { type: String, default: "" },
   isCDOT: { type: Boolean, default: false },
   additionalInformation: { type: mongoose.Mixed },
   // Track Operations Data
   createdAt: { type: Date, default: Date.now },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
   },
   isDeleted: { type: Boolean, default: false },
+  incident: { type: mongoose.Schema.Types.ObjectId, ref: "Incident" },
 });
 
-const Event = mongoose.model('Event', eventSchema);
+const Event = mongoose.model("Event", eventSchema);
 module.exports = Event;
