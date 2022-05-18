@@ -4,8 +4,12 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config({ path: `${__dirname}/src/config/.env` });
 require("./src/config/database");
+const LocalStorage = require("node-localstorage").LocalStorage;
 
 const Incident = require("./src/models/incident.model");
+const Event = require("./src/models/event.model");
+const { findOneAndUpdate } = require("./src/models/event.model");
+localStorage = new LocalStorage("./scratch");
 
 exports.getCotripIncidentsData = () => {
   return new Promise(async (resolve, reject) => {
@@ -14,7 +18,6 @@ exports.getCotripIncidentsData = () => {
       const requestResponse = await axios.get(
         `https://data.cotrip.org/api/v1/incidents?apiKey=${apiKey}`
       );
-      console.log("requestResponse", requestResponse.data);
       resolve(requestResponse.data);
     } catch (error) {
       reject(error);
@@ -61,7 +64,6 @@ exports.createFacebookPagePost = (name, url) => {
       const requestResponse = await axios.post(
         `https://graph.facebook.com/112071708065669/photos?url=${url}&name=${name}&access_token=${access_token}`
       );
-      console.log("requestResponse", requestResponse.data);
       resolve(requestResponse.data);
     } catch (error) {
       reject(error);
@@ -79,32 +81,43 @@ const generatePostText = (incident) => {
 };
 
 const main = async () => {
-  const incidents = await this.getCotripIncidentsData();
+  let locallyStoredIncidents = localStorage.getItem("incidents");
+  let incidents = await this.getCotripIncidentsData();
+
+  // Store the incidents in local storage
+  localStorage.setItem("incidents", JSON.stringify(incidents.features));
+
+  // Compare the incidents with the ones we just fetched.
   for (let incident of incidents.features) {
-    const isIncidentExists = await Incident.exists({
+    const incidentExists = await Incident.exists({
       "properties.id": incident.properties.id,
     });
-    if (isIncidentExists) {
-      // incident always already fetched wtf
-      console.log("Incident already fetched!");
-    } else {
-      let imageUrl = "";
-      if (incident.geometry.type === "MultiPoint") {
-        let coordinates = incident.geometry.coordinates[0];
-        console.log("coordinates", coordinates[1], coordinates[0]);
-        imageUrl = await this.getStaticMapImage(coordinates[1], coordinates[0]);
-        console.log("imageUrl", imageUrl);
-      } else if (incident.geometry.type === "Point") {
-        let coordinates = incident.geometry.coordinates;
-        console.log("coordinates", coordinates[1], coordinates[0]);
-        imageUrl = await this.getStaticMapImage(coordinates[1], coordinates[0]);
-        console.log("imageUrl", imageUrl);
-      }
-      const postText = generatePostText(incident);
+
+    if (!incidentExists) {
       await new Incident(incident).save();
+    }
+
+    for (localIncident of JSON.parse(locallyStoredIncidents)) {
+      // If this localIncident is not within incidents.features, set to deleted
+      let unavailable = !incidents.features.some((i) => {
+        return i.properties.id === localIncident.properties.id;
+      });
+
+      if (unavailable) {
+        const expiredIncident = await Incident.findOne({
+          "properties.id": localIncident.properties.id,
+        });
+
+        await Event.findOneAndUpdate(
+          { incident: expiredIncident._id },
+          { isDeleted: true }
+        );
+      }
     }
   }
 };
+
+main();
 
 var CronJob = require("cron").CronJob;
 var job = new CronJob(

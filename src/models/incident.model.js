@@ -39,7 +39,7 @@ incidentSchema.pre("save", async function preSave(next) {
   // Set the nearby city here
 
   const event = new Event({
-    name: `Incident: ${incidentProperties.type} on ${incidentProperties.routeName}`,
+    name: `${incidentProperties.type} on ${incidentProperties.routeName}`,
     type: incidentProperties.type,
     isCDOT: true,
     location,
@@ -48,6 +48,7 @@ incidentSchema.pre("save", async function preSave(next) {
       latitude: closestCity.lat,
       name: closestCity.name,
     },
+    incident: this._id,
   });
 
   await event.save().then(async (event) => {
