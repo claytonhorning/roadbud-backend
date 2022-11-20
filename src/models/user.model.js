@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema({
   email: { type: String },
-  password: { type: String, default: '' },
-  idType: { type: String, default: '' },
-  fullName: { type: String, default: '' },
-  role: { type: String, default: 'user' },
+  password: { type: String, default: "" },
+  idType: { type: String, default: "" },
+  fullName: { type: String, default: "" },
+  role: { type: String, default: "user" },
   createdAt: { type: Date, default: Date.now },
   lastLoginAt: { type: Date, default: Date.now },
   isDeleted: { type: Boolean, default: false },
@@ -36,8 +36,7 @@ userSchema.methods.generateAuthToken = async function generateAuthToken() {
       fullName: user.fullName,
       role: user.role,
     },
-    process.env.PRIVATEKEY,
-    { expiresIn: '15d' }
+    process.env.PRIVATEKEY
   );
   user.tokens = user.tokens.concat({ token });
   await user.save();
@@ -51,14 +50,14 @@ userSchema.statics.findByCredentials = async function findByCredentials(
   const user = await User.findOne({ email });
   if (!user) {
     // throw new Error("Unable to login: User not registered");
-    const error = new Error('Unable to login: User not registered');
+    const error = new Error("Unable to login: User not registered");
     error.code = 404;
     throw error;
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     // throw new Error("Unable to login: Wrong password");
-    const error = new Error('Unable to login: Wrong password');
+    const error = new Error("Unable to login: Wrong password");
     error.code = 401;
     throw error;
   }
@@ -66,11 +65,11 @@ userSchema.statics.findByCredentials = async function findByCredentials(
 };
 
 // Hash the plain text password before saving
-userSchema.pre('save', function preSave(next) {
+userSchema.pre("save", function preSave(next) {
   try {
     const user = this;
     // only hash the password if it has been modified (or is new)
-    if (!user.isModified('password')) return next();
+    if (!user.isModified("password")) return next();
 
     // generate a salt
     bcrypt.genSalt(8, (err, salt) => {
@@ -90,5 +89,5 @@ userSchema.pre('save', function preSave(next) {
   }
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 module.exports = User;
